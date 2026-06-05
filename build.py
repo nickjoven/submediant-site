@@ -883,6 +883,8 @@ def generate_toc():
     lines.append('      - file: visuals')
     lines.append('        title: "Visual Assets"')
     lines.append("      - file: glossary")
+    lines.append('      - file: declined')
+    lines.append('        title: "Declined Identities"')
 
     toc_path = BOOK_DIR / "_toc.yml"
     toc_path.write_text("\n".join(lines) + "\n")
@@ -1036,6 +1038,8 @@ numerically and produces all predictions from a single run.
   sin(ωt) to Einstein in 10 steps
 - **Where are we?** [Our Address](https://nickjoven.github.io/submediant-site/our_address.html) —
   the universe's computational clock on the Stern-Brocot tree
+- **What's declined?** [Declined Identities](declined.html) —
+  bare $K=1$ values the framework does *not* predict at $M_Z$
 
 ## Source
 
@@ -1380,6 +1384,60 @@ def generate_scorecard_json(manifest):
     print("  _static/scorecard.json")
 
 
+# Display labels for the declined bare-K=1 identities (keyed by manifest key).
+_DECLINED_LABELS = {
+    "sin2_theta_W": r"$\sin^2\theta_W$",
+    "alpha_s_over_alpha_2": r"$\alpha_s/\alpha_2$",
+    "inv_alpha_em_tree": r"$1/\alpha_{\text{em}}$ (tree)",
+    "m_H_over_v": r"$m_H/v$",
+    "lambda_higgs": r"$\lambda$ (Higgs quartic)",
+}
+
+
+def generate_declined(manifest):
+    """Generate the 'Declined Identities' page from MANIFEST.yml.
+
+    These are bare K=1 substrate identities the framework explicitly does
+    *not* promote to predictions at M_Z. Generated from the manifest so the
+    honest-null section stays in sync with the canonical source and never
+    drifts back into the confirmed scorecard.
+    """
+    bare = manifest.get("bare_k1_identities", {})
+    lines = [
+        "# Declined Identities",
+        "",
+        "These are *bare* $K = 1$ substrate identities — exact "
+        "measure-theoretic consequences of the duty-cycle dictionary at "
+        "critical coupling. They are **not** predictions at the electroweak "
+        "scale $M_Z$: the framework declines to predict the anchor-side "
+        "amplification that separates each bare value from its measured "
+        "counterpart. They are listed here, separate from the confirmed "
+        "scorecard, for completeness.",
+        "",
+        "_Source of truth: `harmonics/MANIFEST.yml` → `bare_k1_identities`._",
+        "",
+        "| Identity | Form | Bare value | Status / gap to $M_Z$ |",
+        "|---|---|---|---|",
+    ]
+    for key, d in bare.items():
+        label = _DECLINED_LABELS.get(key, key)
+        form = d.get("form", "")
+        value = d.get("value", "")
+        # m_z_gap is a long sentence; keep the leading quantitative clause.
+        gap = (d.get("m_z_gap") or d.get("status") or "").split(";")[0].strip()
+        lines.append(f"| {label} | `{form}` | {value} | {gap} |")
+    lines += [
+        "",
+        "Each gap is an anchor-side amplification — the same shape as the "
+        "$v/M_P$ and lattice-QCD bare-versus-renormalized gaps. Per-claim "
+        "Z1–Z3 / Class classification lives upstream in "
+        "`numerology_inventory.md`.",
+        "",
+    ]
+    (BOOK_DIR / "declined.md").write_text("\n".join(lines))
+    print("  declined.md")
+
+
 # Presentation files whose quantitative claims must agree with MANIFEST.yml.
 # Submodule trees (harmonics/, 201/, …) are upstream and intentionally excluded.
 _GUARD_GLOBS = ["book/**/*.md", "content/*.md", "reference/*.html",
@@ -1529,6 +1587,7 @@ def main():
     print("\nGenerating machine-readable metadata...")
     generate_derivation_graph(framework_manifest)
     generate_scorecard_json(framework_manifest)
+    generate_declined(framework_manifest)
     generate_glossary()
 
     print("\nChecking presentation layer against MANIFEST.yml...")

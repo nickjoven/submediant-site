@@ -64,6 +64,8 @@ numerically and produces all predictions from a single run.
   sin(ωt) to Einstein in 10 steps
 - **Where are we?** [Our Address](https://nickjoven.github.io/submediant-site/our_address.html) —
   the universe's computational clock on the Stern-Brocot tree
+- **What's declined?** [Declined Identities](declined.html) —
+  bare $K=1$ values the framework does *not* predict at $M_Z$
 
 ## Source
 
