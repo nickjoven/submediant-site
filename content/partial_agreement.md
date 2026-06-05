@@ -138,7 +138,7 @@ The framework produces 0.965 from the self-similarity of the
 devil's staircase at $1/\varphi$, where $\varphi$ is the
 golden ratio.
 
-**~2028.** CMB-S4 will measure the number of e-folds of inflation
+**~2030.** CMB-S4 will measure the number of e-folds of inflation
 with enough precision to test the framework's prediction:
 $N_{\text{efolds}} = \sqrt{5} / \text{rate} = 61.3 \pm 0.7$.
 

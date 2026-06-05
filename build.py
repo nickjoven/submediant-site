@@ -382,7 +382,7 @@ DERIVATIONS = {
          "claim": "Each ADM entry uniquely identified by K=1 Kuramoto symmetries",
          "depends": [12, 13], "section": "03_einstein"},
     47: {"title": "Baryon Fraction", "status": "derived",
-         "claim": "Omega_b = 1/19, Omega_DM = 5/19 from Z6 irreducibility",
+         "claim": "Omega_b = 13/264, Omega_DM = 35/132 from two-component closure",
          "depends": [25, 19], "section": "04b_cosmology"},
 }
 
@@ -997,7 +997,7 @@ physical measurements:
 |---|---|---|
 | Their product is $\\pm 1$ | Born rule: $P = \\lvert\\psi\\rvert^2$ | exact |
 | $\\phi^2 = \\phi + 1$ (self-similarity) | CMB spectral tilt $n_s \\approx 0.965$ | 0.2% |
-| $\\phi - \\psi = \\sqrt{{5}}$ (gap width) | Inflation lasted $\\sim 61$ e-folds | CMB-S4, ~2028 |
+| $\\phi - \\psi = \\sqrt{{5}}$ (gap width) | Inflation lasted $\\sim 61$ e-folds | CMB-S4, ~2030 |
 
 The same polynomial also determines that space has **three dimensions**
 (because fractions have two parts: $\\dim \\mathrm{{SL}}(2) = 2^2 - 1 = 3$)

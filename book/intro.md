@@ -25,7 +25,7 @@ physical measurements:
 |---|---|---|
 | Their product is $\pm 1$ | Born rule: $P = \lvert\psi\rvert^2$ | exact |
 | $\phi^2 = \phi + 1$ (self-similarity) | CMB spectral tilt $n_s \approx 0.965$ | 0.2% |
-| $\phi - \psi = \sqrt{5}$ (gap width) | Inflation lasted $\sim 61$ e-folds | CMB-S4, ~2028 |
+| $\phi - \psi = \sqrt{5}$ (gap width) | Inflation lasted $\sim 61$ e-folds | CMB-S4, ~2030 |
 
 The same polynomial also determines that space has **three dimensions**
 (because fractions have two parts: $\dim \mathrm{SL}(2) = 2^2 - 1 = 3$)
