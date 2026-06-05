@@ -330,7 +330,7 @@ const nodes = [
   { id:"D46", title:"ADM Dictionary", claim:"Each ADM entry uniquely identified by K=1 Kuramoto symmetries.", group:"spacetime", r:8 },
 
   // Baryon Fraction (cosmology)
-  { id:"D47", title:"Baryon Fraction", claim:"Omega_b = 1/19, Omega_DM = 5/19 from Z_6 irreducibility.", group:"cosmology", r:9 }
+  { id:"D47", title:"Baryon Fraction", claim:"Omega_b = 13/264, Omega_DM = 35/132 from two-component closure.", group:"cosmology", r:9 }
 ];
 
 // Observational predictions — these get special rendering
@@ -341,18 +341,14 @@ const predictions = [
   { nodeId:"D14", observable:"d (dimensions)", predicted:"3", observed:"3", residual:"exact", status:"confirmed" },
   { nodeId:"D25", observable:"Omega_Lambda", predicted:"13/19 = 0.6842", observed:"0.6847 +/- 0.0073", residual:"0.07 sigma", status:"confirmed" },
   { nodeId:"D26", observable:"Hierarchy (M_Pl / H_0)", predicted:"6 x 13^54", observed:"8.492e60", residual:"0.48%", status:"confirmed" },
-  { nodeId:"D27", observable:"N_efolds", predicted:"61.3", observed:"TBD", residual:"CMB-S4 ~2028", status:"pending" },
+  { nodeId:"D27", observable:"N_efolds", predicted:"61.3", observed:"TBD", residual:"CMB-S4 ~2030", status:"pending" },
   { nodeId:"D8",  observable:"High-z MOND", predicted:"a_0(z) = a_0(0)(1+z)^beta", observed:"TBD", residual:"—", status:"pending" },
-  { nodeId:"D33", observable:"Weinberg angle sin^2 theta_W", predicted:"8/35 = 0.2286", observed:"0.2312", residual:"1.1%", status:"confirmed" },
-  { nodeId:"D44", observable:"Higgs mass m_H/v", predicted:"1/2", observed:"0.508", residual:"1.6%", status:"confirmed" },
-  { nodeId:"D33", observable:"Higgs quartic lambda", predicted:"1/8 = 0.125", observed:"~0.13", residual:"4%", status:"confirmed" },
-  { nodeId:"D33", observable:"alpha_s / alpha_2", predicted:"27/8 = 3.375", observed:"3.488", residual:"3.2%", status:"confirmed" },
   { nodeId:"D42", observable:"Gauge group", predicted:"SU(3) x SU(2) x U(1)", observed:"SU(3) x SU(2) x U(1)", residual:"exact", status:"confirmed" },
   { nodeId:"D41", observable:"Anomaly cancellation", predicted:"6 conditions = 0", observed:"6 conditions = 0", residual:"exact", status:"confirmed" },
   { nodeId:"D45", observable:"Strong CP angle theta", predicted:"0", observed:"< 1e-10", residual:"exact", status:"confirmed" },
-  { nodeId:"D47", observable:"Omega_DM", predicted:"5/19 = 0.2632", observed:"0.265 +/- 0.007", residual:"0.7%", status:"confirmed" },
-  { nodeId:"D47", observable:"Omega_b", predicted:"1/19 = 0.0526", observed:"0.0493 +/- 0.0003", residual:"6.7%", status:"confirmed" },
-  { nodeId:"D47", observable:"Omega_DM / Omega_b", predicted:"5", observed:"5.41", residual:"7.5%", status:"confirmed" },
+  { nodeId:"D47", observable:"Omega_DM", predicted:"35/132 = 0.2652", observed:"0.265 +/- 0.007", residual:"0.06%", status:"confirmed" },
+  { nodeId:"D47", observable:"Omega_b", predicted:"13/264 = 0.0492", observed:"0.0493 +/- 0.0003", residual:"0.12%", status:"confirmed" },
+  { nodeId:"D47", observable:"Omega_DM / Omega_b", predicted:"70/13 = 5.385", observed:"5.41", residual:"0.6%", status:"confirmed" },
   { nodeId:null,  observable:"Alpha Centauri distance", predicted:"SB path length", observed:"4.37 ly", residual:"—", status:"reinterpretation" }
 ];
 

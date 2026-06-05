@@ -1,0 +1,33 @@
+name: Check claims against MANIFEST.yml
+
+# Verify the presentation layer agrees with the canonical
+# harmonics/MANIFEST.yml. Runs on PRs (where an author can fix drift
+# before merge) and on pushes to main. Independent of build/deploy so it
+# never blocks a scheduled rebuild that may legitimately lag a fresh
+# upstream manifest.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check claims against MANIFEST.yml
+        run: python build.py --check

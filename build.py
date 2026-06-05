@@ -382,7 +382,7 @@ DERIVATIONS = {
          "claim": "Each ADM entry uniquely identified by K=1 Kuramoto symmetries",
          "depends": [12, 13], "section": "03_einstein"},
     47: {"title": "Baryon Fraction", "status": "derived",
-         "claim": "Omega_b = 1/19, Omega_DM = 5/19 from Z6 irreducibility",
+         "claim": "Omega_b = 13/264, Omega_DM = 35/132 from two-component closure",
          "depends": [25, 19], "section": "04b_cosmology"},
 }
 
@@ -883,6 +883,8 @@ def generate_toc():
     lines.append('      - file: visuals')
     lines.append('        title: "Visual Assets"')
     lines.append("      - file: glossary")
+    lines.append('      - file: declined')
+    lines.append('        title: "Declined Identities"')
 
     toc_path = BOOK_DIR / "_toc.yml"
     toc_path.write_text("\n".join(lines) + "\n")
@@ -997,16 +999,18 @@ physical measurements:
 |---|---|---|
 | Their product is $\\pm 1$ | Born rule: $P = \\lvert\\psi\\rvert^2$ | exact |
 | $\\phi^2 = \\phi + 1$ (self-similarity) | CMB spectral tilt $n_s \\approx 0.965$ | 0.2% |
-| $\\phi - \\psi = \\sqrt{{5}}$ (gap width) | Inflation lasted $\\sim 61$ e-folds | CMB-S4, ~2028 |
+| $\\phi - \\psi = \\sqrt{{5}}$ (gap width) | Inflation lasted $\\sim 61$ e-folds | CMB-S4, ~2030 |
 
 The same polynomial also determines that space has **three dimensions**
 (because fractions have two parts: $\\dim \\mathrm{{SL}}(2) = 2^2 - 1 = 3$)
 and that the MOND acceleration scale is $a_0 = 1.25 \\times 10^{{-10}}$ m/s$^2$
 (observed: $1.2 \\times 10^{{-10}}$, residual: 4%).
 
-The frequency distribution $g(\\omega)$ — the one remaining free input —
-determines itself: the distribution that produces dynamics reproducing
-that distribution is unique. The framework introduces no free parameters and no free functions — every quantity is determined by the recurrence and the boundary conditions.
+The frequency distribution $g(\\omega)$ is fixed by self-consistency:
+the distribution that produces dynamics reproducing that distribution
+is unique. The dimensionless predictions follow from the recurrence;
+setting absolute scales requires two dimensionful anchors — the
+cosmological scale $H_0$ and the electroweak scale $v_{{\\text{{EW}}}} = 246$ GeV.
 
 This site walks through the derivation chain, starting from the polynomial
 and arriving at known physics:
@@ -1034,12 +1038,14 @@ numerically and produces all predictions from a single run.
   sin(ωt) to Einstein in 10 steps
 - **Where are we?** [Our Address](https://nickjoven.github.io/submediant-site/our_address.html) —
   the universe's computational clock on the Stern-Brocot tree
+- **What's declined?** [Declined Identities](declined.html) —
+  bare $K=1$ values the framework does *not* predict at $M_Z$
 
 ## Source
 
 - [harmonics](https://github.com/nickjoven/harmonics) — the derivation chain (Derivations {d_range})
 - [rfe](https://github.com/nickjoven/rfe) — the engine (one equation, all observables)
-- [proslambenomenos](https://github.com/nickjoven/proslambenomenos) — one frequency, zero free parameters
+- [proslambenomenos](https://github.com/nickjoven/proslambenomenos) — Λ → a₀: one frequency, structural
 - [201](https://github.com/nickjoven/201) — gravity as synchronization in a frictional medium
 - [intersections](https://github.com/nickjoven/intersections) — stick-slip dynamics and dark matter
 """
@@ -1047,20 +1053,26 @@ numerically and produces all predictions from a single run.
     print("  intro.md")
 
 
-def generate_derivation_graph():
+def generate_derivation_graph(manifest):
     """Generate machine-readable derivation graph as JSON and JSON-LD."""
     static_dir = BOOK_DIR / "_static"
     static_dir.mkdir(exist_ok=True)
 
+    # Quantitative claims come from MANIFEST.yml (canonical), never hardcoded.
+    d_count = manifest.get("derivation_count", len(DERIVATIONS))
+    anchors = manifest.get("dimensionful_inputs", 2)
+
     # Plain JSON graph for programmatic consumption
     graph = {
         "title": "Submediant Derivation Chain",
-        "description": "47 derivations from x^2 - x - 1 = 0 to general relativity, quantum mechanics, and the Standard Model",
+        "description": (
+            f"{d_count} derivations from x^2 - x - 1 = 0 to general "
+            "relativity, quantum mechanics, and the Standard Model"
+        ),
         "author": "N. Joven",
         "license": "CC0 1.0",
         "derivation_count": len(DERIVATIONS),
-        "free_parameters": 0,
-        "free_functions": 0,
+        "dimensionful_anchors": anchors,
         "derivations": {},
         "edges": [],
     }
@@ -1094,7 +1106,7 @@ def generate_derivation_graph():
         "description": (
             "A derivation chain showing how x^2 - x - 1 = 0 leads to "
             "general relativity (K=1), quantum mechanics (K<1), and the "
-            "Standard Model gauge group with zero free parameters."
+            "Standard Model gauge group."
         ),
         "hasPart": [
             {"@type": "Chapter", "name": f"Derivation {n}: {d['title']}",
@@ -1350,19 +1362,203 @@ def build_book():
     return True
 
 
+def generate_scorecard_json(manifest):
+    """Emit the single canonical scorecard artifact from MANIFEST.yml.
+
+    Any page or new material should consume _static/scorecard.json rather
+    than re-hardcoding values. Active predictions and the *declined* bare
+    K=1 identities are kept separate so the two are never conflated.
+    """
+    static_dir = BOOK_DIR / "_static"
+    static_dir.mkdir(exist_ok=True)
+    data = {
+        "source": "harmonics/MANIFEST.yml",
+        "derivation_count": manifest.get("derivation_count"),
+        "derivation_range": manifest.get("derivation_range"),
+        "dimensionful_inputs": manifest.get("dimensionful_inputs"),
+        "predictions": manifest.get("scorecard", {}),
+        "declined_bare_k1_identities": manifest.get("bare_k1_identities", {}),
+    }
+    (static_dir / "scorecard.json").write_text(
+        json.dumps(data, indent=2, ensure_ascii=False))
+    print("  _static/scorecard.json")
+
+
+# Display labels for the declined bare-K=1 identities (keyed by manifest key).
+_DECLINED_LABELS = {
+    "sin2_theta_W": r"$\sin^2\theta_W$",
+    "alpha_s_over_alpha_2": r"$\alpha_s/\alpha_2$",
+    "inv_alpha_em_tree": r"$1/\alpha_{\text{em}}$ (tree)",
+    "m_H_over_v": r"$m_H/v$",
+    "lambda_higgs": r"$\lambda$ (Higgs quartic)",
+}
+
+
+def generate_declined(manifest):
+    """Generate the 'Declined Identities' page from MANIFEST.yml.
+
+    These are bare K=1 substrate identities the framework explicitly does
+    *not* promote to predictions at M_Z. Generated from the manifest so the
+    honest-null section stays in sync with the canonical source and never
+    drifts back into the confirmed scorecard.
+    """
+    bare = manifest.get("bare_k1_identities", {})
+    lines = [
+        "# Declined Identities",
+        "",
+        "These are *bare* $K = 1$ substrate identities — exact "
+        "measure-theoretic consequences of the duty-cycle dictionary at "
+        "critical coupling. They are **not** predictions at the electroweak "
+        "scale $M_Z$: the framework declines to predict the anchor-side "
+        "amplification that separates each bare value from its measured "
+        "counterpart. They are listed here, separate from the confirmed "
+        "scorecard, for completeness.",
+        "",
+        "_Source of truth: `harmonics/MANIFEST.yml` → `bare_k1_identities`._",
+        "",
+        "| Identity | Form | Bare value | Status / gap to $M_Z$ |",
+        "|---|---|---|---|",
+    ]
+    for key, d in bare.items():
+        label = _DECLINED_LABELS.get(key, key)
+        form = d.get("form", "")
+        value = d.get("value", "")
+        # m_z_gap is a long sentence; keep the leading quantitative clause.
+        gap = (d.get("m_z_gap") or d.get("status") or "").split(";")[0].strip()
+        lines.append(f"| {label} | `{form}` | {value} | {gap} |")
+    lines += [
+        "",
+        "Each gap is an anchor-side amplification — the same shape as the "
+        "$v/M_P$ and lattice-QCD bare-versus-renormalized gaps. Per-claim "
+        "Z1–Z3 / Class classification lives upstream in "
+        "`numerology_inventory.md`.",
+        "",
+    ]
+    (BOOK_DIR / "declined.md").write_text("\n".join(lines))
+    print("  declined.md")
+
+
+# Presentation files whose quantitative claims must agree with MANIFEST.yml.
+# Submodule trees (harmonics/, 201/, …) are upstream and intentionally excluded.
+_GUARD_GLOBS = ["book/**/*.md", "content/*.md", "reference/*.html",
+                "reference/*.md"]
+
+# Each declined bare-K=1 identity, with a regex matching how it shows up in
+# the pages. Mirrors manifest['bare_k1_identities']; the guard fails if any of
+# these co-occurs with a "confirmed"/"settled" marker (i.e. is dressed up as a
+# prediction rather than a declined substrate identity).
+_DECLINED_PATTERNS = {
+    "sin2_theta_W": r"sin\^?2.{0,4}theta_?W|Weinberg|8/35",
+    "alpha_s_over_alpha_2": r"alpha_?s\s*/\s*alpha_?2|27/8",
+    "m_H_over_v": r"m_H\s*/\s*v|Higgs mass",
+    "lambda_higgs": r"Higgs quartic|1/8 = 0\.125",
+    "inv_alpha_em_tree": r"1/alpha_em|inv_alpha",
+}
+
+
+def _core_token(value):
+    """'35/132 = 0.26515 (two-component …)' -> '35/132'."""
+    return value.split("=")[0].strip().split()[0].strip()
+
+
+def check_manifest_consistency(manifest):
+    """Scan the presentation layer for claims that contradict MANIFEST.yml.
+
+    Everything checked is derived from the manifest itself, so the guard
+    tracks the canonical source automatically. Returns a list of violation
+    strings (empty == consistent).
+    """
+    import re
+    import glob
+
+    violations = []
+
+    # 1) Retired free-parameter phrasing (manifest free_parameters_note).
+    note = manifest.get("free_parameters_note", "") or ""
+    retired = re.findall(r'"([^"]+)" is retired', note)
+    forbidden_phrases = list(retired) + ["no free parameters", "no free functions"]
+
+    # 2) Superseded single-w dark matter / baryon values.
+    sc = manifest.get("scorecard", {})
+    superseded = []
+    for key in ("dark_matter_fraction", "baryon_fraction", "dm_baryon_ratio"):
+        sw = sc.get(key, {}).get("computed_single_w")
+        if sw:
+            tok = _core_token(sw)
+            if "/" in tok:  # bare integers (e.g. ratio "5") are unmatchable
+                superseded.append(tok)
+
+    # 3) Canonical CMB-S4 e-folds year.
+    efold_residual = sc.get("efolds", {}).get("residual", "")
+    ym = re.search(r"(20\d\d)", efold_residual)
+    canonical_year = ym.group(1) if ym else None
+
+    declined_res = {k: re.compile(v, re.I) for k, v in _DECLINED_PATTERNS.items()}
+    confirmed_re = re.compile(r"\bconfirmed\b|\bsettled\b", re.I)
+
+    for pattern in _GUARD_GLOBS:
+        for path in glob.glob(str(SITE_DIR / pattern), recursive=True):
+            rel = Path(path).relative_to(SITE_DIR)
+            for i, line in enumerate(Path(path).read_text(
+                    encoding="utf-8", errors="ignore").splitlines(), 1):
+                low = line.lower()
+                for phrase in forbidden_phrases:
+                    if phrase.lower() in low:
+                        violations.append(
+                            f"{rel}:{i} retired phrase '{phrase}'")
+                for tok in superseded:
+                    if tok in line:
+                        violations.append(
+                            f"{rel}:{i} superseded single-w value '{tok}' "
+                            f"(manifest uses two-component closure)")
+                if confirmed_re.search(line):
+                    for key, rx in declined_res.items():
+                        if rx.search(line):
+                            violations.append(
+                                f"{rel}:{i} declined identity '{key}' shown "
+                                f"as confirmed/settled prediction")
+                if canonical_year:
+                    for y in re.findall(r"CMB[- ]?S4[^\n]*?~?(20\d\d)", line):
+                        if y != canonical_year:
+                            violations.append(
+                                f"{rel}:{i} CMB-S4 e-folds year {y} != "
+                                f"manifest {canonical_year}")
+    return violations
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the submediant site")
     parser.add_argument("--local", type=str, default=None,
                         help="Path to parent directory containing sibling repos")
     parser.add_argument("--fetch-only", action="store_true",
                         help="Fetch sources and generate book structure, skip build")
+    parser.add_argument("--check", action="store_true",
+                        help="Only verify the presentation layer against "
+                             "MANIFEST.yml, then exit (no fetch/build)")
     args = parser.parse_args()
 
     local_root = Path(args.local).resolve() if args.local else None
 
+    # --check uses the local harmonics submodule when present (offline),
+    # otherwise falls back to fetching MANIFEST.yml from GitHub (CI).
+    if args.check and local_root is None:
+        if (SITE_DIR / "harmonics" / MANIFEST_PATH).exists():
+            local_root = SITE_DIR
+
     print("Loading manifest...")
     framework_manifest = load_manifest(local_root)
     print(f"  derivation_count: {framework_manifest.get('derivation_count', '?')}")
+
+    if args.check:
+        print("\nChecking presentation layer against MANIFEST.yml...")
+        violations = check_manifest_consistency(framework_manifest)
+        if violations:
+            print(f"  DRIFT — {len(violations)} inconsistencies:")
+            for v in violations:
+                print(f"    {v}")
+            return 1
+        print("  OK — presentation layer matches the manifest.")
+        return 0
 
     print("\nFetching sources...")
     sources = fetch_sources(local_root)
@@ -1389,8 +1585,17 @@ def main():
     generate_intro(framework_manifest)
 
     print("\nGenerating machine-readable metadata...")
-    generate_derivation_graph()
+    generate_derivation_graph(framework_manifest)
+    generate_scorecard_json(framework_manifest)
+    generate_declined(framework_manifest)
     generate_glossary()
+
+    print("\nChecking presentation layer against MANIFEST.yml...")
+    drift = check_manifest_consistency(framework_manifest)
+    for v in drift:
+        print(f"  DRIFT: {v}")
+    if not drift:
+        print("  OK — presentation layer matches the manifest.")
 
     content_manifest = {k: hashlib.sha256(v[3]).hexdigest()[:16]
                         for k, v in sources.items()}

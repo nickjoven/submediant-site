@@ -155,7 +155,7 @@ const derivations = [
   { id: "D26", label: "D26", title: "Hierarchy", claim: "Planck/Hubble ratio R = 6 × 13^54 (residual 0.48%).", color: "#ffa657", group: "cosmology", r: 10 },
   { id: "D27", label: "D27", title: "Exponent", claim: "Exponent 54 = q₂ × q₃^d derived from spatial dimension and Klein bottle.", color: "#ffa657", group: "cosmology", r: 10 },
   { id: "D28", label: "D28", title: "Farey Proof", claim: "SO(2) structure at locked/unlocked boundary forces Farey counting.", color: "#ffa657", group: "cosmology", r: 10 },
-  { id: "D47", label: "D47", title: "Baryon Fraction", claim: "Ω_b = 1/19, Ω_DM = 5/19 from Z_6 irreducibility.", color: "#ffa657", group: "cosmology", r: 11 },
+  { id: "D47", label: "D47", title: "Baryon Fraction", claim: "Ω_b = 13/264, Ω_DM = 35/132 from two-component closure.", color: "#ffa657", group: "cosmology", r: 11 },
 
   // Extended Derivations (pink)
   { id: "D30", label: "D30", title: "Denomination Boundary", claim: "Devil's staircase in K-space is a brachistochrone; three open questions unified.", color: "#f5a9b8", group: "extended", r: 10 },
