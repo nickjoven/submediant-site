@@ -1049,19 +1049,26 @@ numerically and produces all predictions from a single run.
     print("  intro.md")
 
 
-def generate_derivation_graph():
+def generate_derivation_graph(manifest):
     """Generate machine-readable derivation graph as JSON and JSON-LD."""
     static_dir = BOOK_DIR / "_static"
     static_dir.mkdir(exist_ok=True)
 
+    # Quantitative claims come from MANIFEST.yml (canonical), never hardcoded.
+    d_count = manifest.get("derivation_count", len(DERIVATIONS))
+    anchors = manifest.get("dimensionful_inputs", 2)
+
     # Plain JSON graph for programmatic consumption
     graph = {
         "title": "Submediant Derivation Chain",
-        "description": "47 derivations from x^2 - x - 1 = 0 to general relativity, quantum mechanics, and the Standard Model",
+        "description": (
+            f"{d_count} derivations from x^2 - x - 1 = 0 to general "
+            "relativity, quantum mechanics, and the Standard Model"
+        ),
         "author": "N. Joven",
         "license": "CC0 1.0",
         "derivation_count": len(DERIVATIONS),
-        "dimensionful_anchors": 2,
+        "dimensionful_anchors": anchors,
         "derivations": {},
         "edges": [],
     }
@@ -1351,19 +1358,149 @@ def build_book():
     return True
 
 
+def generate_scorecard_json(manifest):
+    """Emit the single canonical scorecard artifact from MANIFEST.yml.
+
+    Any page or new material should consume _static/scorecard.json rather
+    than re-hardcoding values. Active predictions and the *declined* bare
+    K=1 identities are kept separate so the two are never conflated.
+    """
+    static_dir = BOOK_DIR / "_static"
+    static_dir.mkdir(exist_ok=True)
+    data = {
+        "source": "harmonics/MANIFEST.yml",
+        "derivation_count": manifest.get("derivation_count"),
+        "derivation_range": manifest.get("derivation_range"),
+        "dimensionful_inputs": manifest.get("dimensionful_inputs"),
+        "predictions": manifest.get("scorecard", {}),
+        "declined_bare_k1_identities": manifest.get("bare_k1_identities", {}),
+    }
+    (static_dir / "scorecard.json").write_text(
+        json.dumps(data, indent=2, ensure_ascii=False))
+    print("  _static/scorecard.json")
+
+
+# Presentation files whose quantitative claims must agree with MANIFEST.yml.
+# Submodule trees (harmonics/, 201/, …) are upstream and intentionally excluded.
+_GUARD_GLOBS = ["book/**/*.md", "content/*.md", "reference/*.html",
+                "reference/*.md"]
+
+# Each declined bare-K=1 identity, with a regex matching how it shows up in
+# the pages. Mirrors manifest['bare_k1_identities']; the guard fails if any of
+# these co-occurs with a "confirmed"/"settled" marker (i.e. is dressed up as a
+# prediction rather than a declined substrate identity).
+_DECLINED_PATTERNS = {
+    "sin2_theta_W": r"sin\^?2.{0,4}theta_?W|Weinberg|8/35",
+    "alpha_s_over_alpha_2": r"alpha_?s\s*/\s*alpha_?2|27/8",
+    "m_H_over_v": r"m_H\s*/\s*v|Higgs mass",
+    "lambda_higgs": r"Higgs quartic|1/8 = 0\.125",
+    "inv_alpha_em_tree": r"1/alpha_em|inv_alpha",
+}
+
+
+def _core_token(value):
+    """'35/132 = 0.26515 (two-component …)' -> '35/132'."""
+    return value.split("=")[0].strip().split()[0].strip()
+
+
+def check_manifest_consistency(manifest):
+    """Scan the presentation layer for claims that contradict MANIFEST.yml.
+
+    Everything checked is derived from the manifest itself, so the guard
+    tracks the canonical source automatically. Returns a list of violation
+    strings (empty == consistent).
+    """
+    import re
+    import glob
+
+    violations = []
+
+    # 1) Retired free-parameter phrasing (manifest free_parameters_note).
+    note = manifest.get("free_parameters_note", "") or ""
+    retired = re.findall(r'"([^"]+)" is retired', note)
+    forbidden_phrases = list(retired) + ["no free parameters", "no free functions"]
+
+    # 2) Superseded single-w dark matter / baryon values.
+    sc = manifest.get("scorecard", {})
+    superseded = []
+    for key in ("dark_matter_fraction", "baryon_fraction", "dm_baryon_ratio"):
+        sw = sc.get(key, {}).get("computed_single_w")
+        if sw:
+            tok = _core_token(sw)
+            if "/" in tok:  # bare integers (e.g. ratio "5") are unmatchable
+                superseded.append(tok)
+
+    # 3) Canonical CMB-S4 e-folds year.
+    efold_residual = sc.get("efolds", {}).get("residual", "")
+    ym = re.search(r"(20\d\d)", efold_residual)
+    canonical_year = ym.group(1) if ym else None
+
+    declined_res = {k: re.compile(v, re.I) for k, v in _DECLINED_PATTERNS.items()}
+    confirmed_re = re.compile(r"\bconfirmed\b|\bsettled\b", re.I)
+
+    for pattern in _GUARD_GLOBS:
+        for path in glob.glob(str(SITE_DIR / pattern), recursive=True):
+            rel = Path(path).relative_to(SITE_DIR)
+            for i, line in enumerate(Path(path).read_text(
+                    encoding="utf-8", errors="ignore").splitlines(), 1):
+                low = line.lower()
+                for phrase in forbidden_phrases:
+                    if phrase.lower() in low:
+                        violations.append(
+                            f"{rel}:{i} retired phrase '{phrase}'")
+                for tok in superseded:
+                    if tok in line:
+                        violations.append(
+                            f"{rel}:{i} superseded single-w value '{tok}' "
+                            f"(manifest uses two-component closure)")
+                if confirmed_re.search(line):
+                    for key, rx in declined_res.items():
+                        if rx.search(line):
+                            violations.append(
+                                f"{rel}:{i} declined identity '{key}' shown "
+                                f"as confirmed/settled prediction")
+                if canonical_year:
+                    for y in re.findall(r"CMB[- ]?S4[^\n]*?~?(20\d\d)", line):
+                        if y != canonical_year:
+                            violations.append(
+                                f"{rel}:{i} CMB-S4 e-folds year {y} != "
+                                f"manifest {canonical_year}")
+    return violations
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the submediant site")
     parser.add_argument("--local", type=str, default=None,
                         help="Path to parent directory containing sibling repos")
     parser.add_argument("--fetch-only", action="store_true",
                         help="Fetch sources and generate book structure, skip build")
+    parser.add_argument("--check", action="store_true",
+                        help="Only verify the presentation layer against "
+                             "MANIFEST.yml, then exit (no fetch/build)")
     args = parser.parse_args()
 
     local_root = Path(args.local).resolve() if args.local else None
 
+    # --check uses the local harmonics submodule when present (offline),
+    # otherwise falls back to fetching MANIFEST.yml from GitHub (CI).
+    if args.check and local_root is None:
+        if (SITE_DIR / "harmonics" / MANIFEST_PATH).exists():
+            local_root = SITE_DIR
+
     print("Loading manifest...")
     framework_manifest = load_manifest(local_root)
     print(f"  derivation_count: {framework_manifest.get('derivation_count', '?')}")
+
+    if args.check:
+        print("\nChecking presentation layer against MANIFEST.yml...")
+        violations = check_manifest_consistency(framework_manifest)
+        if violations:
+            print(f"  DRIFT — {len(violations)} inconsistencies:")
+            for v in violations:
+                print(f"    {v}")
+            return 1
+        print("  OK — presentation layer matches the manifest.")
+        return 0
 
     print("\nFetching sources...")
     sources = fetch_sources(local_root)
@@ -1390,8 +1527,16 @@ def main():
     generate_intro(framework_manifest)
 
     print("\nGenerating machine-readable metadata...")
-    generate_derivation_graph()
+    generate_derivation_graph(framework_manifest)
+    generate_scorecard_json(framework_manifest)
     generate_glossary()
+
+    print("\nChecking presentation layer against MANIFEST.yml...")
+    drift = check_manifest_consistency(framework_manifest)
+    for v in drift:
+        print(f"  DRIFT: {v}")
+    if not drift:
+        print("  OK — presentation layer matches the manifest.")
 
     content_manifest = {k: hashlib.sha256(v[3]).hexdigest()[:16]
                         for k, v in sources.items()}

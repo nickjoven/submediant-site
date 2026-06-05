@@ -31,6 +31,27 @@ permissions:
   id-token: write
 
 jobs:
+  # Verify the presentation layer against the canonical MANIFEST.yml.
+  # Independent of build/deploy so drift is surfaced without blocking a
+  # scheduled rebuild that may legitimately lag a fresh upstream manifest.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check claims against MANIFEST.yml
+        run: python build.py --check
+
   build:
     runs-on: ubuntu-latest
     steps:
