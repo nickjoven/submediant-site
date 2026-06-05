@@ -136,7 +136,7 @@ fails. He fits it. The framework derives it.
 **2018.** Planck measures the CMB spectral tilt: $n_s = 0.9649$.
 The framework produces 0.965 from the self-similarity of the
 devil's staircase at $1/\varphi$, where $\varphi$ is the
-golden ratio. No free parameters.
+golden ratio.
 
 **~2028.** CMB-S4 will measure the number of e-folds of inflation
 with enough precision to test the framework's prediction:

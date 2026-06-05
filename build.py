@@ -1004,9 +1004,11 @@ The same polynomial also determines that space has **three dimensions**
 and that the MOND acceleration scale is $a_0 = 1.25 \\times 10^{{-10}}$ m/s$^2$
 (observed: $1.2 \\times 10^{{-10}}$, residual: 4%).
 
-The frequency distribution $g(\\omega)$ — the one remaining free input —
-determines itself: the distribution that produces dynamics reproducing
-that distribution is unique. The framework introduces no free parameters and no free functions — every quantity is determined by the recurrence and the boundary conditions.
+The frequency distribution $g(\\omega)$ is fixed by self-consistency:
+the distribution that produces dynamics reproducing that distribution
+is unique. The dimensionless predictions follow from the recurrence;
+setting absolute scales requires two dimensionful anchors — the
+cosmological scale $H_0$ and the electroweak scale $v_{{\\text{{EW}}}} = 246$ GeV.
 
 This site walks through the derivation chain, starting from the polynomial
 and arriving at known physics:
@@ -1039,7 +1041,7 @@ numerically and produces all predictions from a single run.
 
 - [harmonics](https://github.com/nickjoven/harmonics) — the derivation chain (Derivations {d_range})
 - [rfe](https://github.com/nickjoven/rfe) — the engine (one equation, all observables)
-- [proslambenomenos](https://github.com/nickjoven/proslambenomenos) — one frequency, zero free parameters
+- [proslambenomenos](https://github.com/nickjoven/proslambenomenos) — Λ → a₀: one frequency, structural
 - [201](https://github.com/nickjoven/201) — gravity as synchronization in a frictional medium
 - [intersections](https://github.com/nickjoven/intersections) — stick-slip dynamics and dark matter
 """
@@ -1059,8 +1061,7 @@ def generate_derivation_graph():
         "author": "N. Joven",
         "license": "CC0 1.0",
         "derivation_count": len(DERIVATIONS),
-        "free_parameters": 0,
-        "free_functions": 0,
+        "dimensionful_anchors": 2,
         "derivations": {},
         "edges": [],
     }
@@ -1094,7 +1095,7 @@ def generate_derivation_graph():
         "description": (
             "A derivation chain showing how x^2 - x - 1 = 0 leads to "
             "general relativity (K=1), quantum mechanics (K<1), and the "
-            "Standard Model gauge group with zero free parameters."
+            "Standard Model gauge group."
         ),
         "hasPart": [
             {"@type": "Chapter", "name": f"Derivation {n}: {d['title']}",
