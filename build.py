@@ -885,6 +885,8 @@ def generate_toc():
     lines.append("      - file: glossary")
     lines.append('      - file: declined')
     lines.append('        title: "Declined Identities"')
+    lines.append('      - file: coherence')
+    lines.append('        title: "Coherence"')
 
     toc_path = BOOK_DIR / "_toc.yml"
     toc_path.write_text("\n".join(lines) + "\n")
