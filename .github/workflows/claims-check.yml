@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout site repo
         uses: actions/checkout@v4
+        with:
+          submodules: true  # gallery link-check resolves figures in submodules
 
       - name: Set up Python
         uses: actions/setup-python@v5
