@@ -1362,28 +1362,6 @@ def build_book():
     return True
 
 
-def generate_scorecard_json(manifest):
-    """Emit the single canonical scorecard artifact from MANIFEST.yml.
-
-    Any page or new material should consume _static/scorecard.json rather
-    than re-hardcoding values. Active predictions and the *declined* bare
-    K=1 identities are kept separate so the two are never conflated.
-    """
-    static_dir = BOOK_DIR / "_static"
-    static_dir.mkdir(exist_ok=True)
-    data = {
-        "source": "harmonics/MANIFEST.yml",
-        "derivation_count": manifest.get("derivation_count"),
-        "derivation_range": manifest.get("derivation_range"),
-        "dimensionful_inputs": manifest.get("dimensionful_inputs"),
-        "predictions": manifest.get("scorecard", {}),
-        "declined_bare_k1_identities": manifest.get("bare_k1_identities", {}),
-    }
-    (static_dir / "scorecard.json").write_text(
-        json.dumps(data, indent=2, ensure_ascii=False))
-    print("  _static/scorecard.json")
-
-
 # Display labels for the declined bare-K=1 identities (keyed by manifest key).
 _DECLINED_LABELS = {
     "sin2_theta_W": r"$\sin^2\theta_W$",
@@ -1586,7 +1564,6 @@ def main():
 
     print("\nGenerating machine-readable metadata...")
     generate_derivation_graph(framework_manifest)
-    generate_scorecard_json(framework_manifest)
     generate_declined(framework_manifest)
     generate_glossary()
 
