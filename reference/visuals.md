@@ -54,9 +54,9 @@ Phase portraits from the original Kuramoto-Einstein mapping.
 
 | File | Description |
 |---|---|
-| [phase_newtonian.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/phase_newtonian.png) | Phase portrait: Newtonian regime ($g \gg a_0$). Decoupled orbits. |
-| [phase_mond.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/phase_mond.png) | Phase portrait: MOND regime ($g \ll a_0$). Entrained orbits. |
-| [phase_transition.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/phase_transition.png) | Phase portrait: transition regime ($g \approx a_0$). The synchronization boundary. |
+| [phase_newtonian.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/img/phase_newtonian.png) | Phase portrait: Newtonian regime ($g \gg a_0$). Decoupled orbits. |
+| [phase_deep_mond.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/img/phase_deep_mond.png) | Phase portrait: MOND regime ($g \ll a_0$). Entrained orbits. |
+| [phase_boundary.png](https://github.com/nickjoven/proslambenomenos/blob/main/docs/img/phase_boundary.png) | Phase portrait: transition regime ($g \approx a_0$). The synchronization boundary. |
 
 ### Harmonics Derivation Plots
 

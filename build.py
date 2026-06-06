@@ -1504,6 +1504,49 @@ def check_manifest_consistency(manifest):
     return violations
 
 
+# Submodules whose files the gallery links into and we can verify locally.
+_LOCAL_REPOS = {"harmonics", "proslambenomenos", "201", "intersections"}
+
+
+def check_gallery_links():
+    """Verify every locally-resolvable asset linked from the visual gallery.
+
+    Catches the drift class where a figure/app is moved or renamed upstream
+    and the gallery link silently 404s. Checks GitHub blob links into the
+    submodules and internal links to reference/*.html. Cross-site GitHub
+    Pages links (other repos' deployed sites) and book-internal page links
+    are not resolvable offline and are skipped. Returns violation strings.
+    """
+    import re
+
+    gallery = SITE_DIR / "reference" / "visuals.md"
+    if not gallery.exists():
+        return []
+    text = gallery.read_text(encoding="utf-8")
+    violations = []
+
+    # GitHub blob links into a submodule: .../nickjoven/<repo>/blob/<ref>/<path>.
+    # Only check repos that are actually checked out and populated, so an
+    # uninitialized submodule doesn't produce false "missing" for every link.
+    def _populated(repo):
+        d = SITE_DIR / repo
+        return d.is_dir() and any(d.iterdir())
+
+    for repo, path in re.findall(
+            r"github\.com/nickjoven/([\w.-]+)/blob/[^/]+/([^)\s#]+)", text):
+        if (repo in _LOCAL_REPOS and _populated(repo)
+                and not (SITE_DIR / repo / path).exists()):
+            violations.append(f"reference/visuals.md: missing {repo}/{path}")
+
+    # Internal links to this site's reference pages.
+    for fname in re.findall(
+            r"nickjoven\.github\.io/submediant-site/([\w-]+\.html)", text):
+        if not (SITE_DIR / "reference" / fname).exists():
+            violations.append(f"reference/visuals.md: missing reference/{fname}")
+
+    return violations
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the submediant site")
     parser.add_argument("--local", type=str, default=None,
@@ -1530,12 +1573,13 @@ def main():
     if args.check:
         print("\nChecking presentation layer against MANIFEST.yml...")
         violations = check_manifest_consistency(framework_manifest)
+        violations += check_gallery_links()
         if violations:
-            print(f"  DRIFT — {len(violations)} inconsistencies:")
+            print(f"  DRIFT — {len(violations)} issues:")
             for v in violations:
                 print(f"    {v}")
             return 1
-        print("  OK — presentation layer matches the manifest.")
+        print("  OK — claims match the manifest and gallery links resolve.")
         return 0
 
     print("\nFetching sources...")
@@ -1569,10 +1613,11 @@ def main():
 
     print("\nChecking presentation layer against MANIFEST.yml...")
     drift = check_manifest_consistency(framework_manifest)
+    drift += check_gallery_links()
     for v in drift:
         print(f"  DRIFT: {v}")
     if not drift:
-        print("  OK — presentation layer matches the manifest.")
+        print("  OK — claims match the manifest and gallery links resolve.")
 
     content_manifest = {k: hashlib.sha256(v[3]).hexdigest()[:16]
                         for k, v in sources.items()}
